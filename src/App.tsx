@@ -439,7 +439,7 @@ function Events(){
     {
       title: "Pragati — The Bengal Hackfest 2026",
       project: "Autonomous Snake Detection System",
-      img: "/event/pragati/WhatsApp Image 2026-04-23 at 9.56.58 PM.jpeg",
+      img: "/event/pragati/pragati-1.jpeg",
       desc: "Led the team as both Team Lead and Tech Lead at Jadavpur University. Built an Autonomous Snake Detection System using a custom YOLO model to identify 4 categories of venomous snakes. Designed a biomimetic trap combining Trifecta lure, AI vision, and an automated door-locking response system.",
       result: "Selected among the Top 8 teams at Pragati Hackathon.",
       experience: "We missed out in the final business round due to unclear pitching. That experience taught me something important: a strong project needs equally strong communication.",
