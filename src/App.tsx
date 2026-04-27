@@ -18,24 +18,6 @@ function Reveal({children,className="reveal",delay=0,style={},...props}:any){
   return <div ref={ref} className={`${className}${visible?" visible":""}`} style={{transitionDelay:`${delay}s`,...style}} {...props}>{children}</div>;
 }
 
-/* ── Count-Up Hook ── */
-function useCountUp(target:number,duration=2000){
-  const[count,setCount]=useState(0);
-  const[started,setStarted]=useState(false);
-  const ref=useRef<HTMLDivElement>(null);
-  useEffect(()=>{
-    const el=ref.current;if(!el)return;
-    const obs=new IntersectionObserver(([e])=>{if(e.isIntersecting){setStarted(true);obs.disconnect();}},{threshold:0.5});
-    obs.observe(el);return()=>obs.disconnect();
-  },[]);
-  useEffect(()=>{
-    if(!started)return;
-    let start=0;const step=(ts:number)=>{if(!start)start=ts;const p=Math.min((ts-start)/duration,1);setCount(Math.floor(p*target));if(p<1)requestAnimationFrame(step);};
-    requestAnimationFrame(step);
-  },[started,target,duration]);
-  return{ref,count};
-}
-
 /* ── Intro Screen ── */
 function IntroScreen({done}:{done:boolean}){
   return(
@@ -54,46 +36,14 @@ function BackToTop(){
   return <button className={`back-to-top${show?" show":""}`} onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} aria-label="Back to top">↑</button>;
 }
 
-/* ── Stats Section ── */
-function Stats(){
-  const s1=useCountUp(12);const s2=useCountUp(5);const s3=useCountUp(3);const s4=useCountUp(4);
-  return(
-    <Reveal style={{padding:"40px 52px 0"}}>
-      <div style={{maxWidth:1200,margin:"0 auto",display:"grid",gridTemplateColumns:"repeat(4,1fr)",background:"linear-gradient(145deg,#18080C,#0C0608)",border:"1px solid #33151A",borderRadius:12,overflow:"hidden"}}>
-        {[{ref:s1.ref,count:s1.count,suffix:"+",label:"Projects Built"},{ref:s2.ref,count:s2.count,suffix:"",label:"Certifications"},{ref:s3.ref,count:s3.count,suffix:"",label:"Awards Won"},{ref:s4.ref,count:s4.count,suffix:"+",label:"Domains"}].map((s,i)=>(
-          <div key={i} ref={s.ref} className="stat-item">
-            <div style={{fontFamily:"Inter,sans-serif",fontSize:48,fontWeight:700,color:"#FFFFFF",letterSpacing:"-2px"}}>{s.count}{s.suffix}</div>
-            <div style={{fontFamily:"Inter,sans-serif",fontSize:14,color:"#A49B95",marginTop:6,letterSpacing:"-0.5px"}}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-    </Reveal>
-  );
-}
 
-
-function useTypewriter(words){
-  const[text,setText]=useState("");
-  const i=useRef(0),c=useRef(0),del=useRef(false);
-  useEffect(()=>{
-    let t;
-    const tick=()=>{
-      const w=words[i.current];
-      if(!del.current){setText(w.slice(0,c.current+1));c.current++;if(c.current===w.length){del.current=true;t=setTimeout(tick,1600);return;}}
-      else{setText(w.slice(0,c.current-1));c.current--;if(c.current===0){del.current=false;i.current=(i.current+1)%words.length;}}
-      t=setTimeout(tick,del.current?45:90);
-    };
-    t=setTimeout(tick,500);return()=>clearTimeout(t);
-  },[]);
-  return text;
-}
 
 function Cursor(){
-  const dot=useRef(null),ring=useRef(null),pos=useRef({x:-100,y:-100}),rp=useRef({x:-100,y:-100});
+  const dot=useRef<any>(null),ring=useRef<any>(null),pos=useRef({x:-100,y:-100}),rp=useRef({x:-100,y:-100});
   useEffect(()=>{
-    const mv=e=>{pos.current={x:e.clientX,y:e.clientY};if(dot.current)dot.current.style.transform=`translate(${e.clientX-4}px,${e.clientY-4}px)`;};
+    const mv=(e:any)=>{pos.current={x:e.clientX,y:e.clientY};if(dot.current)dot.current.style.transform=`translate(${e.clientX-4}px,${e.clientY-4}px)`;};
     window.addEventListener("mousemove",mv);
-    let raf;
+    let raf: any;
     const loop=()=>{
       rp.current.x+=(pos.current.x-rp.current.x)*0.15;
       rp.current.y+=(pos.current.y-rp.current.y)*0.15;
@@ -134,14 +84,14 @@ function GithubIcon({size=24, color="#FFFFFF"}){
 }
 
 function ParticleField(){
-  const cv=useRef(null);
+  const cv=useRef<any>(null);
   useEffect(()=>{
     const c=cv.current;if(!c)return;
     const ctx=c.getContext("2d");
     const resize=()=>{c.width=c.offsetWidth;c.height=c.offsetHeight;};
     resize();window.addEventListener("resize",resize);
     const pts=Array.from({length:35},()=>({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.2+.4}));
-    let raf;
+    let raf: any;
     const draw=()=>{
       ctx.clearRect(0,0,c.width,c.height);
       pts.forEach(p=>{
@@ -151,7 +101,7 @@ function ParticleField(){
         ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
         ctx.fillStyle="rgba(200,29,51,0.2)";ctx.fill();
       });
-      pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{
+      pts.forEach((a,i)=>pts.slice(i+1).forEach((b:any)=>{
         const d=Math.hypot(a.x-b.x,a.y-b.y);
         if(d<110){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(200,29,51,${.07*(1-d/110)})`;ctx.lineWidth=.5;ctx.stroke();}
       }));
@@ -162,13 +112,13 @@ function ParticleField(){
   return<canvas ref={cv} style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}}/>;
 }
 
-function Modal({item,onClose}){
+function Modal({item,onClose}: any){
   if(!item)return null;
   const[mounted,setMounted]=useState(false);
   useEffect(()=>{setTimeout(()=>setMounted(true),10);},[]);
   const S={
-    overlay:{position:"fixed",inset:0,background:"rgba(10,5,8,0.4)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:20,opacity:mounted?1:0,transition:"opacity 0.3s"},
-    box:{background:"rgba(18, 13, 15, 0.4)",border:"1px solid #22181B",borderRadius:30,maxWidth:820,width:"100%",maxHeight:"90vh",overflowY:"auto",padding:"50px 55px",position:"relative",transform:mounted?"perspective(1200px) translateZ(0) scale(1)":"perspective(1200px) translateZ(-200px) scale(0.85)",transition:"transform 0.4s cubic-bezier(0.34,1.56,0.64,1)",boxShadow:"0 60px 120px rgba(0,0,0,0.9)"},
+    overlay:{position:"fixed",inset:0,background:"rgba(10,5,8,0.4)",backdropFilter:"blur(24px)",WebkitBackdropFilter:"blur(24px)",zIndex:3000,display:"flex",alignItems:"center",justifyContent:"center",padding:20,opacity:mounted?1:0,transition:"opacity 0.3s"} as React.CSSProperties,
+    box:{background:"rgba(18, 13, 15, 0.4)",border:"1px solid #22181B",borderRadius:30,maxWidth:820,width:"100%",maxHeight:"90vh",overflowY:"auto",padding:"50px 55px",position:"relative",transform:mounted?"perspective(1200px) translateZ(0) scale(1)":"perspective(1200px) translateZ(-200px) scale(0.85)",transition:"transform 0.4s cubic-bezier(0.34,1.56,0.64,1)",boxShadow:"0 60px 120px rgba(0,0,0,0.9)"} as React.CSSProperties,
   };
   return(
     <div style={S.overlay} onClick={onClose}>
@@ -185,7 +135,7 @@ function Modal({item,onClose}){
         {item.tech&&<div style={{marginBottom:36}}>
           <h4 style={{fontFamily:"Inter, sans-serif",fontSize:15,color:"#EAE2DD",letterSpacing:"-1.5px",margin:"0 0 14px"}}>Tech Stack</h4>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            {item.tech.map(t=><span key={t} style={{fontFamily:"Inter, sans-serif",fontSize:15,color:"#A3A3A3",background:"#22181B",border:"1px solid #242424",padding:"6px 14px",borderRadius:30}}>{t}</span>)}
+            {item.tech.map((t:any)=><span key={t} style={{fontFamily:"Inter, sans-serif",fontSize:15,color:"#A3A3A3",background:"#22181B",border:"1px solid #242424",padding:"6px 14px",borderRadius:30}}>{t}</span>)}
           </div>
         </div>}
 
@@ -289,9 +239,9 @@ function TiltCard({children,style={},onClick=undefined}:any){
   return <div ref={ref} className="tilt-card" style={style} onClick={onClick} onMouseMove={handleMove} onMouseLeave={handleLeave}>{children}</div>;
 }
 
-function Slider({id,title,label,data,cats,onSel,dark,isSmall=false}){
+function Slider({id,title,label,data,cats,onSel,dark,isSmall=false}: any){
   const[cat,setCat]=useState("All");
-  const filtered=cats&&cat!=="All"?data.filter(d=>d.cat===cat):data;
+  const filtered=cats&&cat!=="All"?data.filter((d:any)=>d.cat===cat):data;
   const[idx,setIdx]=useState(0);
   useEffect(()=>setIdx(0),[cat]);
   const N=isSmall?4:3,max=Math.max(0,filtered.length-N);
@@ -309,13 +259,13 @@ function Slider({id,title,label,data,cats,onSel,dark,isSmall=false}){
             <h2 style={{fontFamily:"Inter, sans-serif",fontWeight:600,fontSize:42,color:"#A3A3A3",margin:0,letterSpacing:"-1px"}}>{title}</h2>
           </div>
           {cats&&<div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            {cats.map(c=><button key={c} onClick={()=>setCat(c)} style={{background:cat===c?"#FFFFFF":"transparent",color:cat===c?"#000000":"#FFFFFF",border:`1px solid ${cat===c?"#FFFFFF":"rgba(255,255,255,0.4)"}`,padding:"8px 18px",fontFamily:"Inter, sans-serif",fontSize:14,fontWeight:cat===c?700:400,letterSpacing:"-1px",cursor:"pointer",borderRadius:30,transition:"all .2s"}}>{c}</button>)}
+            {cats.map((c:any)=><button key={c} onClick={()=>setCat(c)} style={{background:cat===c?"#FFFFFF":"transparent",color:cat===c?"#000000":"#FFFFFF",border:`1px solid ${cat===c?"#FFFFFF":"rgba(255,255,255,0.4)"}`,padding:"8px 18px",fontFamily:"Inter, sans-serif",fontSize:14,fontWeight:cat===c?700:400,letterSpacing:"-1px",cursor:"pointer",borderRadius:30,transition:"all .2s"}}>{c}</button>)}
           </div>}
         </div>
 
         <div style={{overflow:"hidden"}}>
           <div className="slider-items" style={{display:"flex",gap:22,transition:"transform .5s ease",transform:`translateX(calc(-${idx*(100/N)}% - ${idx*(22/N)}px))`}}>
-            {filtered.map(item=>(
+            {filtered.map((item:any)=>(
               <div key={item.title} onClick={()=>onSel(item)} style={{flex:`0 0 calc(${100/N}% - ${22*(N-1)/N}px)`,minWidth:isSmall?220:280,cursor:"pointer"}}>
                 <TiltCard style={{height:itemHeight,background:"linear-gradient(145deg, #18080C, #0C0608)",border:"1px solid #33151A",borderRadius:8,overflow:"hidden",boxShadow:"0 10px 30px rgba(0,0,0,0.5)",transition:"border-color .3s, transform .15s ease-out"}}>
                   {item.img?(
@@ -330,7 +280,7 @@ function Slider({id,title,label,data,cats,onSel,dark,isSmall=false}){
                   ):(
                     <div style={{padding:30,height:"100%",boxSizing:"border-box",display:"flex",flexDirection:"column"}}>
                       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
-                        {item.tech&&item.tech.slice(0,3).map(t=><span key={t} style={{fontFamily:"Inter, sans-serif",fontSize:13,color:"#FFFFFF",border:"1px solid rgba(255,255,255,0.4)",padding:"4px 10px",borderRadius:30}}>{t}</span>)}
+                        {item.tech&&item.tech.slice(0,3).map((t:any)=><span key={t} style={{fontFamily:"Inter, sans-serif",fontSize:13,color:"#FFFFFF",border:"1px solid rgba(255,255,255,0.4)",padding:"4px 10px",borderRadius:30}}>{t}</span>)}
                       </div>
                       <h3 style={{fontFamily:"Inter, sans-serif",fontWeight:600,fontSize:24,color:"#FFFFFF",margin:"0 0 16px",letterSpacing:.5,lineHeight:1.2}}>{item.title}</h3>
                       <p style={{fontFamily:"'Inter',sans-serif",fontWeight:400,fontSize:16,color:"#D4CDC8",lineHeight:1.65,margin:0,flex:1,overflow:"hidden",display:"-webkit-box",WebkitBoxOrient:"vertical",WebkitLineClamp:4}}>{item.why||item.desc}</p>
@@ -511,7 +461,7 @@ function Events(){
               onMouseEnter={e=>{e.currentTarget.style.borderColor="#C81D33";e.currentTarget.style.transform="translateY(-10px)"}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor="#33151A";e.currentTarget.style.transform="translateY(0)"}}>
               <div style={{height:400,overflow:"hidden",position:"relative"}}>
-                <img src={ev.img} alt={ev.title} style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.7,transition:"opacity 0.3s"}} onMouseEnter={e=>e.currentTarget.style.opacity=1} onMouseLeave={e=>e.currentTarget.style.opacity=0.7}/>
+                <img src={ev.img} alt={ev.title} style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.7,transition:"opacity 0.3s"}} onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.7"}/>
                 <div style={{position:"absolute",top:20,right:20,background:"#C81D33",color:"#0A0708",fontFamily:"Inter, sans-serif",fontSize:14,fontWeight:600,padding:"6px 14px",borderRadius:30,}}>{ev.label}</div>
               </div>
               <div style={{padding:40,flex:1,display:"flex",flexDirection:"column"}}>
@@ -556,7 +506,7 @@ function Contact(){
               <iframe 
                 src="https://maps.google.com/maps?q=KIIT+University+KP-5+Hostel&t=&z=16&ie=UTF8&iwloc=&output=embed" 
                 width="100%" height="100%" style={{border:0,filter:"invert(90%) hue-rotate(180deg) contrast(1.1) grayscale(20%)"}} 
-                allowFullScreen="" loading="lazy">
+                allowFullScreen={true} loading="lazy">
               </iframe>
               <a href="https://www.google.com/maps/search/?api=1&query=KIIT+University+KP-5+Hostel" target="_blank" rel="noopener noreferrer" 
                  style={{position:"absolute",top:16,left:16,background:"rgba(10,10,10,0.85)",backdropFilter:"blur(8px)",color:"#e0e0e0",padding:"8px 14px",borderRadius:6,fontFamily:"'Inter',sans-serif",fontSize:15,textDecoration:"none",border:"1px solid #333",display:"flex",alignItems:"center",gap:6,transition:"background 0.2s"}}
@@ -621,8 +571,8 @@ export default function App(){
       <Education/>
       <Slider id="projects" title="Projects" label="Work" data={projects} cats={PROJECT_CATS} onSel={setSel} dark={false}/>
       <Events/>
-      <Slider id="certificates" title="Certificates" label="Credentials" data={certificates} onSel={setSel} dark={true} isSmall={true}/>
-      <Slider id="achievements" title="Achievements" label="Recognition" data={achievements} onSel={setSel} dark={false}/>
+      <Slider id="certificates" title="Certificates" label="Credentials" data={certificates} cats={[]} onSel={setSel} dark={true} isSmall={true}/>
+      <Slider id="achievements" title="Achievements" label="Recognition" data={achievements} cats={[]} onSel={setSel} dark={false}/>
       <Contact/>
       <Modal item={sel} onClose={()=>setSel(null)}/>
       <footer style={{padding:"36px 52px",textAlign:"center",borderTop:"1px solid rgba(200,29,51,0.15)"}}>
